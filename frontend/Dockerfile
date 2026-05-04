@@ -14,6 +14,8 @@ RUN git clone --depth 1 https://github.com/glenwrhodes/crew_editor.git .
 COPY patches/vite.config.ts ./vite.config.ts
 COPY patches/api.ts ./src/utils/api.ts
 COPY patches/ExportModal.tsx ./src/components/modals/ExportModal.tsx
+COPY patches/patch-types.sh /tmp/patch-types.sh
+RUN chmod +x /tmp/patch-types.sh && /tmp/patch-types.sh
 
 # Install dependencies and build
 RUN npm ci
