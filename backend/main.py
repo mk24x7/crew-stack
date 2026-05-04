@@ -1,6 +1,7 @@
 import asyncio
 import os
 
+import httpx
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -32,9 +33,42 @@ EXECUTION_TIMEOUT = int(os.environ.get("EXECUTION_TIMEOUT", "300"))
 _semaphore = asyncio.Semaphore(MAX_CONCURRENT)
 
 
+OLLAMA_HOST = os.environ.get("OLLAMA_HOST", "http://host.docker.internal:11434")
+
+
 @app.get("/health")
 async def health():
     return {"status": "ok"}
+
+
+@app.get("/models")
+async def list_models():
+    """List available Ollama models and flag OpenAI availability."""
+    ollama_models = []
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            resp = await client.get(f"{OLLAMA_HOST}/api/tags")
+            if resp.status_code == 200:
+                data = resp.json()
+                for m in data.get("models", []):
+                    name = m.get("name", "")
+                    size = m.get("details", {}).get("parameter_size", "")
+                    ollama_models.append({
+                        "id": f"ollama/{name}",
+                        "name": name,
+                        "provider": "ollama",
+                        "parameter_size": size,
+                    })
+    except Exception:
+        pass
+
+    openai_available = bool(os.environ.get("OPENAI_API_KEY", "").startswith("sk-"))
+
+    return {
+        "ollama_models": ollama_models,
+        "openai_available": openai_available,
+        "ollama_reachable": len(ollama_models) > 0,
+    }
 
 
 @app.post("/execute", response_model=CrewExecutionResponse)

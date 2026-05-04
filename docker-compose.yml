@@ -17,6 +17,8 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
@@ -24,6 +26,7 @@ services:
       - BROWSERLESS_API_KEY=${BROWSERLESS_API_KEY:-}
       - GROQ_API_KEY=${GROQ_API_KEY:-}
       - GOOGLE_API_KEY=${GOOGLE_API_KEY:-}
+      - OLLAMA_HOST=${OLLAMA_HOST:-http://host.docker.internal:11434}
       - EXECUTION_TIMEOUT=${EXECUTION_TIMEOUT:-300}
       - MAX_CONCURRENT=${MAX_CONCURRENT:-3}
     healthcheck:

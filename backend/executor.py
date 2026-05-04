@@ -37,6 +37,7 @@ ENV_PASSTHROUGH_KEYS = [
     "MISTRAL_API_KEY",
     "XAI_API_KEY",
     "OPENROUTER_API_KEY",
+    "OLLAMA_HOST",
     "HOME",
     "PATH",
     "LANG",
